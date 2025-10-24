@@ -1,41 +1,12 @@
-// js/script.js - Enhanced with Lab 4 APIs
-
-// ===== REUSABLE NAVIGATION =====
-function loadNavigation() {
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    
-    const navHTML = `
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="index.html" class="nav-logo">Chandandeep Singh</a>
-            
-            <input type="checkbox" id="nav-toggle" class="nav-toggle">
-            <label for="nav-toggle" class="nav-toggle-label">
-                <span></span>
-                <span></span>
-                <span></span>
-            </label>
-            
-            <ul class="nav-menu">
-                <li><a href="index.html" class="${currentPage === 'index.html' ? 'active' : ''}">Home</a></li>
-                <li><a href="journal.html" class="${currentPage === 'journal.html' ? 'active' : ''}">Journal</a></li>
-                <li><a href="about.html" class="${currentPage === 'about.html' ? 'active' : ''}">About</a></li>
-                <li><a href="projects.html" class="${currentPage === 'projects.html' ? 'active' : ''}">Projects</a></li>
-            </ul>
-        </div>
-    </nav>`;
-    
-    document.body.insertAdjacentHTML('afterbegin', navHTML);
-}
+// js/script.js - Complete with spaced header layout
 
 // ===== STORAGE API ENHANCEMENTS =====
 function saveJournalEntries() {
     const entries = [];
     document.querySelectorAll('.journal-entry').forEach(entry => {
-        const contentElement = entry.querySelector('.entry-content') || entry.querySelector('.collapsible-content');
         entries.push({
             title: entry.querySelector('h2').textContent,
-            content: contentElement ? contentElement.innerHTML : '',
+            content: entry.querySelector('.collapsible-content').innerHTML,
             date: entry.querySelector('.entry-meta').textContent
         });
     });
@@ -84,19 +55,46 @@ function initThemeSwitcher() {
     }
 }
 
-// ===== LIVE DATE DISPLAY =====
-function displayLiveDate() {
-    const dateElement = document.getElementById('live-date');
-    if (dateElement) {
-        const now = new Date();
-        const options = { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        };
-        dateElement.textContent = now.toLocaleDateString('en-US', options);
-    }
+// ===== HEADER STRUCTURE MANAGEMENT =====
+function ensureHeaderStructure() {
+    document.querySelectorAll('.journal-entry').forEach(entry => {
+        const header = entry.querySelector('.collapsible-header');
+        if (!header) return;
+        
+        // Get the title text from existing content
+        let titleText = header.textContent
+            .replace('▼', '')
+            .replace('📋 Copy', '')
+            .replace('📋 Copy Entry', '')
+            .replace('📋', '')
+            .trim();
+        
+        // Clear header and rebuild with proper structure
+        header.innerHTML = '';
+        
+        // Create title element
+        const title = document.createElement('h2');
+        title.textContent = titleText;
+        header.appendChild(title);
+        
+        // Create spacer element
+        const spacer = document.createElement('div');
+        spacer.className = 'header-spacer';
+        header.appendChild(spacer);
+        
+        // Create actions container
+        const entryActions = document.createElement('div');
+        entryActions.className = 'entry-actions';
+        
+        // Create toggle icon
+        const toggleIcon = document.createElement('span');
+        toggleIcon.className = 'toggle-icon';
+        toggleIcon.textContent = '▼';
+        toggleIcon.setAttribute('aria-label', 'Toggle section');
+        entryActions.appendChild(toggleIcon);
+        
+        header.appendChild(entryActions);
+    });
 }
 
 // ===== BROWSER API: CLIPBOARD API =====
@@ -108,39 +106,41 @@ function initClipboardAPI() {
         
         const copyBtn = document.createElement('button');
         copyBtn.className = 'copy-btn';
-        copyBtn.textContent = '📋 Copy Entry';
-        copyBtn.addEventListener('click', function() {
+        copyBtn.innerHTML = '📋 Copy';
+        copyBtn.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent triggering collapsible toggle
+            
             const title = entry.querySelector('h2').textContent;
-            const contentElement = entry.querySelector('.entry-content') || entry.querySelector('.collapsible-content');
-            const content = contentElement ? contentElement.textContent : '';
+            const content = entry.querySelector('.collapsible-content').textContent;
             const textToCopy = `${title}\n\n${content}`;
             
             navigator.clipboard.writeText(textToCopy).then(() => {
-                // Show success feedback
-                const originalText = this.textContent;
-                this.textContent = '✅ Copied!';
+                // Show success feedback with better design
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '✅ Copied!';
+                this.style.background = 'linear-gradient(135deg, #27ae60 0%, #229954 100%)';
+                
                 setTimeout(() => {
-                    this.textContent = originalText;
+                    this.innerHTML = originalHTML;
+                    this.style.background = '';
                 }, 2000);
             }).catch(err => {
                 console.error('Failed to copy: ', err);
-                this.textContent = '❌ Failed';
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '❌ Failed';
+                this.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                
                 setTimeout(() => {
-                    this.textContent = '📋 Copy Entry';
+                    this.innerHTML = originalHTML;
+                    this.style.background = '';
                 }, 2000);
             });
         });
         
-        const header = entry.querySelector('.collapsible-header');
-        if (header) {
-            // Create actions container if it doesn't exist
-            let actionsContainer = header.querySelector('.entry-actions');
-            if (!actionsContainer) {
-                actionsContainer = document.createElement('div');
-                actionsContainer.className = 'entry-actions';
-                header.appendChild(actionsContainer);
-            }
-            actionsContainer.appendChild(copyBtn);
+        // Add copy button to entry actions
+        const entryActions = entry.querySelector('.entry-actions');
+        if (entryActions) {
+            entryActions.appendChild(copyBtn);
         }
     });
 }
@@ -173,23 +173,16 @@ function updateWordCount(text) {
         wordCountEl = document.createElement('div');
         wordCountEl.id = 'word-count';
         wordCountEl.className = 'word-count';
-        const entryInput = document.getElementById('journal-entry');
-        if (entryInput) {
-            entryInput.parentNode.appendChild(wordCountEl);
-        }
+        document.getElementById('journal-entry').parentNode.appendChild(wordCountEl);
     }
     
-    const words = text.trim() ? text.trim().split(/\s+/).filter(word => word.length > 0).length : 0;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
     wordCountEl.textContent = `Word count: ${words}`;
     wordCountEl.className = `word-count ${words >= 10 ? 'valid' : 'invalid'}`;
 }
 
 // ===== THIRD-PARTY API: YOUTUBE EMBED =====
 function initYouTubeAPI() {
-    // Check if we're on a page that needs YouTube API
-    const playerContainer = document.getElementById('youtube-player');
-    if (!playerContainer) return;
-    
     // Load YouTube IFrame API
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
@@ -207,7 +200,7 @@ function onYouTubeIframeAPIReady() {
         youtubePlayer = new YT.Player('youtube-player', {
             height: '315',
             width: '560',
-            videoId: 'bMknfKXIFA8', // Web Development tutorial video
+            videoId: 'VIDEO_ID_HERE', // Replace with your video ID
             playerVars: {
                 'playsinline': 1,
                 'rel': 0,
@@ -238,35 +231,25 @@ function addYouTubeControls() {
     if (!controlsDiv) return;
     
     controlsDiv.innerHTML = `
-        <button onclick="youtubePlayer.playVideo()">▶️ Play</button>
-        <button onclick="youtubePlayer.pauseVideo()">⏸️ Pause</button>
-        <button onclick="youtubePlayer.stopVideo()">⏹️ Stop</button>
-        <button onclick="youtubePlayer.mute()">🔇 Mute</button>
-        <button onclick="youtubePlayer.unMute()">🔊 Unmute</button>
+        <button onclick="youtubePlayer.playVideo()">
+            <span style="font-size:1.2em">▶️</span> Play
+        </button>
+        <button onclick="youtubePlayer.pauseVideo()">
+            <span style="font-size:1.2em">⏸️</span> Pause
+        </button>
+        <button onclick="youtubePlayer.stopVideo()">
+            <span style="font-size:1.2em">⏹️</span> Stop
+        </button>
+        <button onclick="youtubePlayer.mute()">
+            <span style="font-size:1.2em">🔇</span> Mute
+        </button>
+        <button onclick="youtubePlayer.unMute()">
+            <span style="font-size:1.2em">🔊</span> Unmute
+        </button>
     `;
 }
 
-// ===== JOURNAL ENTRY CREATION =====
-function createJournalEntry(title, content, date) {
-    return `
-        <article class="journal-entry collapsible">
-            <div class="collapsible-header">
-                <h2>${title}</h2>
-                <div class="entry-actions">
-                    <span class="toggle-icon">▼</span>
-                </div>
-            </div>
-            <div class="collapsible-content">
-                <div class="entry-meta">Posted on: ${date}</div>
-                <div class="entry-content">
-                    ${content.replace(/\n/g, '<br>')}
-                </div>
-            </div>
-        </article>
-    `;
-}
-
-// ===== FORM VALIDATION AND JOURNAL ENTRY CREATION =====
+// ===== ENHANCED FORM VALIDATION WITH VALIDATION API =====
 function initFormValidation() {
     const journalForm = document.getElementById('journal-form');
     
@@ -314,26 +297,39 @@ function initFormValidation() {
             }
             
             // Re-initialize features for new entry
+            ensureHeaderStructure();
             initCollapsibleSections();
             initClipboardAPI();
             saveJournalEntries();
             
-            // Show success message using Browser API if available
-            if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification('Journal Entry Saved', {
-                    body: 'Your journal entry has been added successfully!',
-                    icon: '/favicon.ico'
-                });
-            } else {
-                alert('Journal entry added successfully!');
-            }
-            
+            alert('Journal entry added successfully!');
             journalForm.reset();
             updateWordCount('');
             
             return true;
         });
     }
+}
+
+// Enhanced journal entry creation
+function createJournalEntry(title, content, date) {
+    return `
+        <article class="journal-entry collapsible">
+            <div class="collapsible-header">
+                <h2>${title}</h2>
+                <div class="header-spacer"></div>
+                <div class="entry-actions">
+                    <span class="toggle-icon">▼</span>
+                </div>
+            </div>
+            <div class="collapsible-content">
+                <div class="entry-meta">Posted on: ${date}</div>
+                <div class="entry-content">
+                    ${content.replace(/\n/g, '<br>')}
+                </div>
+            </div>
+        </article>
+    `;
 }
 
 // ===== COLLAPSIBLE SECTIONS =====
@@ -355,7 +351,10 @@ function initCollapsibleSections() {
         
         if (content && content.classList.contains('collapsible-content')) {
             // Add click event to header
-            header.addEventListener('click', function() {
+            header.addEventListener('click', function(e) {
+                // Don't trigger if click was on copy button
+                if (e.target.closest('.copy-btn')) return;
+                
                 // Toggle the content visibility
                 if (content.style.display === 'block' || content.style.display === '') {
                     content.style.display = 'none';
@@ -382,7 +381,51 @@ function initCollapsibleSections() {
     });
 }
 
-// ===== STORAGE DEMO FUNCTIONS =====
+// ===== REUSABLE NAVIGATION =====
+function loadNavigation() {
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    
+    const navHTML = `
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">Chandandeep Singh</a>
+            
+            <input type="checkbox" id="nav-toggle" class="nav-toggle">
+            <label for="nav-toggle" class="nav-toggle-label">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+            
+            <ul class="nav-menu">
+                <li><a href="index.html" class="${currentPage === 'index.html' ? 'active' : ''}">Home</a></li>
+                <li><a href="journal.html" class="${currentPage === 'journal.html' ? 'active' : ''}">Journal</a></li>
+                <li><a href="about.html" class="${currentPage === 'about.html' ? 'active' : ''}">About</a></li>
+                <li><a href="projects.html" class="${currentPage === 'projects.html' ? 'active' : ''}">Projects</a></li>
+            </ul>
+        </div>
+    </nav>`;
+    
+    // Insert navigation at the beginning of body
+    document.body.insertAdjacentHTML('afterbegin', navHTML);
+}
+
+// ===== LIVE DATE DISPLAY =====
+function displayLiveDate() {
+    const dateElement = document.getElementById('live-date');
+    if (dateElement) {
+        const now = new Date();
+        const options = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        };
+        dateElement.textContent = now.toLocaleDateString('en-US', options);
+    }
+}
+
+// ===== STORAGE DEMO FUNCTION =====
 function showStorageInfo() {
     const infoDiv = document.getElementById('storage-info');
     const theme = localStorage.getItem('theme') || 'light';
@@ -393,7 +436,6 @@ function showStorageInfo() {
         <p><strong>Current Theme:</strong> ${theme}</p>
         <p><strong>Saved Journal Entries:</strong> ${entryCount}</p>
         <p><strong>Storage Used:</strong> ${calculateStorageUsage()} KB</p>
-        <p><strong>Session Storage:</strong> ${sessionStorage.getItem('theme') ? 'Active' : 'Not used'}</p>
     `;
 }
 
@@ -407,31 +449,22 @@ function calculateStorageUsage() {
     return (total / 1024).toFixed(2);
 }
 
-// ===== NOTIFICATION API (BONUS BROWSER API) =====
-function initNotificationAPI() {
-    // Request notification permission
-    if ('Notification' in window) {
-        if (Notification.permission === 'default') {
-            Notification.requestPermission().then(permission => {
-                console.log('Notification permission:', permission);
-            });
-        }
-    }
-}
-
-// Enhanced initialization with proper ordering
+// ===== ENHANCED INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded - initializing enhanced Lab 4 API features');
+    console.log('DOM loaded - initializing enhanced features');
     
     // Load reusable navigation
     loadNavigation();
     
-    // Initialize all features in correct order
+    // Ensure proper header structure first (IMPORTANT)
+    ensureHeaderStructure();
+    
+    // Initialize all features
     displayLiveDate();
     initThemeSwitcher();
     initFormValidation();
-    initCollapsibleSections(); // This must be before clipboard API
-    initClipboardAPI(); // This adds buttons to existing entries
+    initCollapsibleSections();
+    initClipboardAPI();
     initEnhancedValidation();
     initYouTubeAPI();
     
@@ -441,11 +474,11 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Loaded saved journal entries:', savedEntries);
     }
     
-    console.log('All JavaScript features initialized successfully!');
+    console.log('All enhanced features initialized successfully!');
     
     // Demonstrate DOM selection methods
     console.log('DOM Selection Methods Used:');
     console.log('- getElementById: for single elements like live-date, theme-toggle');
     console.log('- querySelectorAll: for multiple elements like collapsible sections');
-    console.log('- querySelector: for single elements with CSS selectors');
+    console.log('- querySelector: for single element selection');
 });
