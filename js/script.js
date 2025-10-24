@@ -70,10 +70,16 @@ function initThemeSwitcher() {
 }
 
 // Journal Entry Creation
-// Fixed Journal Entry Creation - Remove duplicate "Posted on"
-function createJournalEntry(title, content, date) {
+// Fixed Journal Entry Creation - No duplicate "Posted on:" and only delete for new entries
+function createJournalEntry(title, content, date, isNewEntry = false) {
+    const deleteButton = isNewEntry ? `
+        <div class="entry-footer">
+            <button class="delete-btn" onclick="deleteJournalEntry(this)">🗑️ Delete Entry</button>
+        </div>
+    ` : '';
+    
     return `
-        <article class="journal-entry collapsible" data-deletable="true">
+        <article class="journal-entry collapsible" data-deletable="${isNewEntry}">
             <div class="collapsible-header">
                 <h2>${title}</h2>
                 <div class="entry-actions">
@@ -81,17 +87,16 @@ function createJournalEntry(title, content, date) {
                 </div>
             </div>
             <div class="collapsible-content">
-                <div class="entry-meta">${date}</div> <!-- REMOVED "Posted on:" -->
+                <div class="entry-meta">${date}</div>
                 <div class="entry-content">
                     ${content.replace(/\n/g, '<br>')}
                 </div>
-                <div class="entry-footer">
-                    <button class="delete-btn" onclick="deleteJournalEntry(this)">🗑️ Delete Entry</button>
-                </div>
+                ${deleteButton}
             </div>
         </article>
     `;
 }
+
 // Delete Journal Entry Function
 function deleteJournalEntry(button) {
     if (confirm('Are you sure you want to delete this journal entry?')) {
@@ -107,8 +112,7 @@ function deleteJournalEntry(button) {
 }
 
 
-// Form Validation - Enhanced
-
+// Form Validation - Fixed for new entries only
 function initFormValidation() {
     const journalForm = document.getElementById('journal-form');
     
@@ -135,7 +139,7 @@ function initFormValidation() {
                 return false;
             }
             
-            // Create new journal entry
+            // Create new journal entry - MARK AS NEW ENTRY
             const now = new Date();
             const dateString = `Posted on: ${now.toLocaleDateString('en-US', { 
                 year: 'numeric', 
@@ -143,7 +147,7 @@ function initFormValidation() {
                 day: 'numeric' 
             })}`;
             
-            const newEntryHTML = createJournalEntry(title, content, dateString);
+            const newEntryHTML = createJournalEntry(title, content, dateString, true); // true = isNewEntry
             const journalEntriesContainer = document.getElementById('journal-entries-container');
             
             // ADD NEW ENTRY AT THE TOP
@@ -153,8 +157,8 @@ function initFormValidation() {
             
             // Save to storage and re-initialize ALL features
             saveJournalEntries();
-            initCollapsibleSections(); // Re-initialize collapsible
-            initClipboardAPI(); // Re-initialize copy buttons
+            initCollapsibleSections();
+            initClipboardAPI();
             
             alert('Journal entry added successfully!');
             journalForm.reset();
@@ -166,6 +170,7 @@ function initFormValidation() {
         });
     }
 }
+
 // Fixed Collapsible Sections
 function initCollapsibleSections() {
     const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
