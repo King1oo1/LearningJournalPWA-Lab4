@@ -3,19 +3,22 @@
 // ===== JOURNAL ENTRIES STORAGE =====
 function saveJournalEntries() {
     const entries = [];
+    
+    // Get entries in the order they appear (newest first)
     document.querySelectorAll('.journal-entry').forEach(entry => {
         const title = entry.querySelector('h2').textContent;
         const content = entry.querySelector('.collapsible-content').innerHTML;
         const date = entry.querySelector('.entry-meta').textContent.replace('Posted on: ', '');
         
-        entries.push({
+        entries.unshift({ // Use unshift to add to beginning (reverse order)
             title: title,
             content: content,
             date: date
         });
     });
+    
     localStorage.setItem('journalEntries', JSON.stringify(entries));
-    console.log('Journal entries saved to localStorage');
+    console.log('Journal entries saved to localStorage (newest first)');
 }
 
 function loadJournalEntries() {
@@ -31,20 +34,17 @@ function restoreJournalEntries() {
     const container = document.getElementById('journal-entries-container');
     
     if (savedEntries && container) {
-        // Clear existing entries except the form
+        // Clear existing entries
         const existingEntries = container.querySelectorAll('.journal-entry');
         existingEntries.forEach(entry => entry.remove());
         
-        // Add saved entries
-        savedEntries.forEach(entry => {
+        // Add saved entries in reverse order (newest first)
+        savedEntries.reverse().forEach(entry => {
             const entryHTML = createJournalEntry(entry.title, entry.content, entry.date);
-            const journalFormSection = document.querySelector('.journal-form-section');
-            if (journalFormSection) {
-                journalFormSection.insertAdjacentHTML('afterend', entryHTML);
-            }
+            container.insertAdjacentHTML('afterbegin', entryHTML);
         });
         
-        console.log('Journal entries restored from localStorage');
+        console.log('Journal entries restored from localStorage (newest first)');
         return true;
     }
     return false;

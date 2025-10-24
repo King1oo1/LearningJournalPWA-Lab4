@@ -89,7 +89,7 @@ function createJournalEntry(title, content, date) {
     `;
 }
 
-// Form Validation
+// Form Validation - UPDATED TO ADD ENTRIES AT TOP
 function initFormValidation() {
     const journalForm = document.getElementById('journal-form');
     
@@ -125,9 +125,11 @@ function initFormValidation() {
             });
             
             const newEntryHTML = createJournalEntry(title, content, dateString);
-            const journalFormSection = document.querySelector('.journal-form-section');
-            if (journalFormSection) {
-                journalFormSection.insertAdjacentHTML('afterend', newEntryHTML);
+            const journalEntriesContainer = document.getElementById('journal-entries-container');
+            
+            // ADD NEW ENTRY AT THE TOP (after the form section)
+            if (journalEntriesContainer) {
+                journalEntriesContainer.insertAdjacentHTML('afterbegin', newEntryHTML);
             }
             
             // Save to storage and re-initialize
