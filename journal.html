@@ -36,6 +36,41 @@
         <!-- Journal Entries Container -->
         <div id="journal-entries-container">
         <!-- Existing Journal Entries -->
+ <!-- Week 4 Journal Entry -->
+            <article class="journal-entry collapsible">
+                <div class="collapsible-header">
+                    <h2>Week 4: Introduction to APIs</h2>
+                    <div class="entry-actions">
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                </div>
+                <div class="collapsible-content">
+                    <div class="entry-meta">Posted on: November 2025</div>
+                    
+                    <h3>Which Storage, Browser, and Third-Party APIs did you choose, and why?</h3>
+                    <p><strong>Storage API:</strong> Enhanced Local Storage for journal entries and theme preferences, with Session Storage as fallback. Chosen for its simplicity and wide browser support.</p>
+                    <p><strong>Browser API:</strong> Clipboard API for copying journal entries and enhanced Validation API for form validation. These improve user experience significantly.</p>
+                    <p><strong>Third-Party API:</strong> YouTube Player API to embed educational videos. Chosen because video content enhances learning experience.</p>
+                    
+                    <h3>How did you integrate each API with DOM manipulation?</h3>
+                    <p><strong>Storage API:</strong> Used <code>localStorage.setItem()</code> and <code>getItem()</code> to persist data, then dynamically updated DOM elements based on stored preferences.</p>
+                    <p><strong>Clipboard API:</strong> Added copy buttons to journal entries that use <code>navigator.clipboard.writeText()</code> and provide visual feedback.</p>
+                    <p><strong>YouTube API:</strong> Used <code>YT.Player()</code> constructor to create embedded player and added custom controls that manipulate the video player.</p>
+                    
+                    <h3>What challenges did you encounter, and how did you solve them?</h3>
+                    <p><strong>Clipboard API permissions:</strong> Some browsers require secure context (HTTPS). Added error handling and fallback messages.</p>
+                    <p><strong>YouTube API loading:</strong> Had to ensure API script loads before initialization. Used the <code>onYouTubeIframeAPIReady</code> callback.</p>
+                    <p><strong>Validation timing:</strong> Form validation needed to work with both custom logic and browser Validation API. Combined both approaches.</p>
+                    
+                    <h3>In what ways do these APIs improve your Learning Journal PWA?</h3>
+                    <p><strong>Persistence:</strong> Users don't lose their entries or preferences when closing the browser.</p>
+                    <p><strong>Usability:</strong> Copy functionality makes it easy to share insights, and form validation provides immediate feedback.</p>
+                    <p><strong>Rich Content:</strong> YouTube integration adds multimedia learning resources directly in the journal.</p>
+                    <p><strong>Professional Feel:</strong> APIs make the PWA feel like a native application with advanced features.</p>
+                </div>
+            </article>
+
+ <!-- Week 3 Journal Entry -->
         <article class="journal-entry collapsible">
             <div class="collapsible-header">
                 <h2>Week 3: JavaScript & DOM Manipulation</h2>
@@ -55,6 +90,7 @@
             </div>
         </article>
 
+            <!-- Week 2 Journal Entry -->
         <article class="journal-entry collapsible">
             <div class="collapsible-header">
                 <h2>Week 2: Frontend Fundamentals</h2>
@@ -73,7 +109,7 @@
                 <p>The hardest things for me were choosing a breakpoint and media queries. To enable smooth transitions between layouts, the ideal breakpoints for various devices needed to be tested and adjusted.</p>
             </div>
         </article>
-
+<!-- Week 1 Journal Entry -->
         <article class="journal-entry collapsible">
             <div class="collapsible-header">
                 <h2>Week 1: Introduction to Mobile Development</h2>
@@ -90,7 +126,29 @@
                 <p>Set up the initial project structure with proper folder organization, created the basic HTML pages, and established the GitHub repository for version control.</p>
             </div>
         </article>
+        </div>
+ <!-- YouTube API Section -->
+        <section class="youtube-section">
+            <h2>Learning Resources</h2>
+            <p>Watch this tutorial video about JavaScript APIs to enhance your understanding:</p>
+            
+            <div class="youtube-player-container">
+                <div id="youtube-player"></div>
+            </div>
+            
+            <div id="youtube-controls">
+                <!-- Controls will be added by JavaScript -->
+            </div>
+            
+            <div class="storage-demo">
+                <h4>Storage API Demo</h4>
+                <p>Your journal entries and theme preferences are automatically saved using the Web Storage API (Local Storage and Session Storage).</p>
+                <button onclick="showStorageInfo()" class="btn-primary">Show Storage Info</button>
+                <div id="storage-info"></div>
+            </div>
+        </section>
     </main>
+
 
     <footer class="footer">
         <p>&copy; 2025 Chandandeep Singh. All rights reserved.</p>

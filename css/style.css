@@ -452,7 +452,7 @@ body {
     background: rgba(255,255,255,0.3);
 }
 
-/* ===== COLLAPSIBLE SECTION STYLES - ENHANCED ===== */
+/* ===== COLLAPSIBLE SECTION STYLES ===== */
 .collapsible-header {
     cursor: pointer;
     padding: 1rem;
@@ -511,11 +511,6 @@ body {
     transform: rotate(180deg);
 }
 
-/* Make sure journal entries have proper spacing */
-.journal-entry {
-    margin-bottom: 2rem;
-}
-
 /* ===== LIVE DATE STYLES ===== */
 .live-date {
     margin-top: 1rem;
@@ -557,6 +552,135 @@ body {
     max-width: 600px;
     margin: 0 auto;
     line-height: 1.6;
+}
+
+/* ===== LAB 4 API ENHANCEMENTS ===== */
+
+/* Copy Button Styles */
+.copy-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin-left: 1rem;
+    transition: background-color 0.3s;
+}
+
+.copy-btn:hover {
+    background: #2980b9;
+}
+
+.dark-theme .copy-btn {
+    background: #2c3e50;
+}
+
+.dark-theme .copy-btn:hover {
+    background: #34495e;
+}
+
+/* Word Count Styles */
+.word-count {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.word-count.valid {
+    color: #27ae60;
+}
+
+.word-count.invalid {
+    color: #e74c3c;
+}
+
+/* YouTube Player Styles */
+.youtube-section {
+    margin: 2rem 0;
+    padding: 2rem;
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.youtube-player-container {
+    margin: 1rem 0;
+    display: flex;
+    justify-content: center;
+}
+
+#youtube-controls {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+#youtube-controls button {
+    background: #ff0000;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#youtube-controls button:hover {
+    background: #cc0000;
+}
+
+/* Entry Actions */
+.entry-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Enhanced Form Validation Styles */
+.form-group input:invalid,
+.form-group textarea:invalid {
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+}
+
+.form-group input:valid,
+.form-group textarea:valid {
+    border-color: #27ae60;
+}
+
+/* Session Storage Demo */
+.storage-demo {
+    background: var(--card-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    border-left: 4px solid #3498db;
+}
+
+.storage-demo h4 {
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.dark-theme .storage-demo h4 {
+    color: #ffffff;
+}
+
+/* API Feature Indicators */
+.api-feature {
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.api-feature:before {
+    content: "🔌";
+    position: absolute;
+    left: 0;
 }
 
 /* Media Queries - Tablet */
@@ -616,7 +740,9 @@ body {
     .navbar,
     .theme-btn,
     .journal-form-section,
-    .collapsible-header {
+    .collapsible-header,
+    .copy-btn,
+    .youtube-section {
         display: none;
     }
     
