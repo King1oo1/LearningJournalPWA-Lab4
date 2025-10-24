@@ -986,6 +986,57 @@ body {
     left: 0;
 }
 
+/* ===== API SECTION STYLES ===== */
+.api-section {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin: 2rem auto;
+    border: 1px solid #e9ecef;
+    text-align: center;
+}
+
+.dark-theme .api-section {
+    border-color: #404040;
+}
+
+.api-section h2 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.dark-theme .api-section h2 {
+    color: #ffffff;
+}
+
+.api-section p {
+    color: #7f8c8d;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+}
+
+.api-result {
+    background: rgba(255,255,255,0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    text-align: left;
+    border: 1px dashed #bdc3c7;
+}
+
+.dark-theme .api-result {
+    border-color: #555;
+}
+
+.api-result p {
+    margin: 0.5rem 0;
+    color: var(--text-color);
+}
+
+
+
 /* Media Queries - Tablet */
 @media screen and (min-width: 768px) {
     .posts-grid,
