@@ -70,7 +70,7 @@ function initThemeSwitcher() {
 }
 
 // Journal Entry Creation
-// Enhanced Journal Entry Creation with Delete Button
+// Fixed Journal Entry Creation - Remove duplicate "Posted on"
 function createJournalEntry(title, content, date) {
     return `
         <article class="journal-entry collapsible" data-deletable="true">
@@ -81,7 +81,7 @@ function createJournalEntry(title, content, date) {
                 </div>
             </div>
             <div class="collapsible-content">
-                <div class="entry-meta">Posted on: ${date}</div>
+                <div class="entry-meta">${date}</div> <!-- REMOVED "Posted on:" -->
                 <div class="entry-content">
                     ${content.replace(/\n/g, '<br>')}
                 </div>
@@ -108,6 +108,7 @@ function deleteJournalEntry(button) {
 
 
 // Form Validation - Enhanced
+
 function initFormValidation() {
     const journalForm = document.getElementById('journal-form');
     
@@ -136,11 +137,11 @@ function initFormValidation() {
             
             // Create new journal entry
             const now = new Date();
-            const dateString = now.toLocaleDateString('en-US', { 
+            const dateString = `Posted on: ${now.toLocaleDateString('en-US', { 
                 year: 'numeric', 
                 month: 'long', 
                 day: 'numeric' 
-            });
+            })}`;
             
             const newEntryHTML = createJournalEntry(title, content, dateString);
             const journalEntriesContainer = document.getElementById('journal-entries-container');
@@ -165,7 +166,6 @@ function initFormValidation() {
         });
     }
 }
-
 // Fixed Collapsible Sections
 function initCollapsibleSections() {
     const collapsibleHeaders = document.querySelectorAll('.collapsible-header');

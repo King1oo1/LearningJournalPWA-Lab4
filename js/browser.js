@@ -1,4 +1,4 @@
-// Enhanced Clipboard API with forced re-initialization
+// Enhanced Clipboard API - Force add copy buttons to ALL entries
 function initClipboardAPI() {
     // Remove existing copy buttons first
     document.querySelectorAll('.copy-btn').forEach(btn => btn.remove());
@@ -43,7 +43,7 @@ function initClipboardAPI() {
         }
     });
     
-    console.log('Copy buttons initialized');
+    console.log('Copy buttons initialized for all entries');
 }
 
 // ===== VALIDATION API =====

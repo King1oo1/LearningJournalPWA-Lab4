@@ -1156,3 +1156,11 @@ body {
         transform: translateY(0);
     }
 }
+/* Entry Meta - Fixed */
+.entry-meta {
+    color: #7f8c8d;
+    font-style: italic;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    padding: 0;
+}

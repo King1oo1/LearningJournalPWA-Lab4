@@ -4,11 +4,19 @@
 function saveJournalEntries() {
     const entries = [];
     
+
+   
     // Get entries in the order they appear (newest first)
     document.querySelectorAll('.journal-entry').forEach(entry => {
         const title = entry.querySelector('h2').textContent;
         const content = entry.querySelector('.collapsible-content').innerHTML;
-        const date = entry.querySelector('.entry-meta').textContent.replace('Posted on: ', '');
+        const dateElement = entry.querySelector('.entry-meta');
+        let date = dateElement ? dateElement.textContent : '';
+        
+        // If date doesn't have "Posted on:", add it for consistency
+        if (date && !date.includes('Posted on:')) {
+            date = `Posted on: ${date}`;
+        }
         
         entries.unshift({ // Use unshift to add to beginning (reverse order)
             title: title,
@@ -19,7 +27,8 @@ function saveJournalEntries() {
     
     localStorage.setItem('journalEntries', JSON.stringify(entries));
     console.log('Journal entries saved to localStorage (newest first)');
-}
+} 
+
 
 function loadJournalEntries() {
     const savedEntries = localStorage.getItem('journalEntries');
