@@ -419,22 +419,21 @@ function initNotificationAPI() {
     }
 }
 
-// ===== ENHANCED INITIALIZATION =====
+// Enhanced initialization with proper ordering
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded - initializing Lab 4 API features');
+    console.log('DOM loaded - initializing enhanced Lab 4 API features');
     
     // Load reusable navigation
     loadNavigation();
     
-    // Initialize all features
+    // Initialize all features in correct order
     displayLiveDate();
     initThemeSwitcher();
     initFormValidation();
-    initCollapsibleSections();
-    initClipboardAPI();
+    initCollapsibleSections(); // This must be before clipboard API
+    initClipboardAPI(); // This adds buttons to existing entries
     initEnhancedValidation();
     initYouTubeAPI();
-    initNotificationAPI();
     
     // Load saved journal entries
     const savedEntries = loadJournalEntries();
@@ -442,7 +441,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Loaded saved journal entries:', savedEntries);
     }
     
-    console.log('All Lab 4 API features initialized successfully!');
+    console.log('All JavaScript features initialized successfully!');
     
     // Demonstrate DOM selection methods
     console.log('DOM Selection Methods Used:');
