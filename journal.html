@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal - Chandandeep Singh</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navigation will be inserted here by JavaScript -->
+    
+     
+    <main class="container">
+        <h1>Learning Journal</h1>
+        
+        <!-- New Journal Entry Form -->
+        <section class="journal-form-section">
+            <h2>Add New Journal Entry</h2>
+            <p class="form-description">Fill out the form below to add a new journal entry. Your entry will appear at the top of the journal.</p>
+            <form id="journal-form">
+                <div class="form-group">
+                    <label for="journal-title">Title:</label>
+                    <input type="text" id="journal-title" name="title" placeholder="e.g., Week 4" required>
+                </div>
+                <div class="form-group">
+                    <label for="journal-entry">Entry Content:</label>
+                    <textarea id="journal-entry" name="entry" rows="6" 
+                              placeholder="Write your journal entry here (minimum 10 words)..." 
+                              required></textarea>
+                    <small>Minimum 10 words required. Your entry will be displayed below.</small>
+                </div>
+                <button type="submit" class="btn-primary">Add Journal Entry</button>
+            </form>
+        </section>
+        
+        <!-- Journal Entries Container -->
+        <div id="journal-entries-container">
+        <!-- Existing Journal Entries -->
+        <article class="journal-entry collapsible">
+            <div class="collapsible-header">
+                <h2>Week 3: JavaScript & DOM Manipulation</h2>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="collapsible-content">
+                <div class="entry-meta">Posted on: October 2025</div>
+                
+                <h3>Which DOM selection methods did you use, and why did you choose them?</h3>
+                <p>I used getElementById() for single things like the live date and theme toggle because it is fast and accurate. Because of its flexibility and ability to accept CSS selectors, I used querySelectorAll() for several objects, including collapsable sections.</p>
+                
+                <h3>What was the most challenging part about linking JavaScript with your HTML?</h3>
+                <p>The most difficult aspect was making sure that the JavaScript loaded at the right moment and that all DOM elements were available when the scripts tried to access them. The use of the DOMContentLoaded event solves the time issue.</p>
+                
+                <h3>How did you test and debug your JavaScript code?</h3>
+                <p>I used browser developer tools extensively, such as console.log for debugging data, the Elements tab for checking DOM structure, and testing all interactive features on different screen sizes to ensure responsiveness.</p>
+            </div>
+        </article>
+
+        <article class="journal-entry collapsible">
+            <div class="collapsible-header">
+                <h2>Week 2: Frontend Fundamentals</h2>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="collapsible-content">
+                <div class="entry-meta">Posted on: October 2025</div>
+                
+                <h3>Mobile-First Design Approach</h3>
+                <p>I began by designing with mobile devices in mind, utilising a layout with one column that eventually expands on larger screens. This method ensured that the essential content and functionality worked flawlessly on reduced viewports.</p>
+                
+                <h3>Most Useful HTML/CSS Concept</h3>
+                <p>The CSS Flexbox concept was the most helpful one I used to create responsive layout structures and navigation. With Flexbox, creating flexible components that adjust to various screen sizes without requiring intricate computations was simple.</p>
+                
+                <h3>Most Challenging Aspect</h3>
+                <p>The hardest things for me were choosing a breakpoint and media queries. To enable smooth transitions between layouts, the ideal breakpoints for various devices needed to be tested and adjusted.</p>
+            </div>
+        </article>
+
+        <article class="journal-entry collapsible">
+            <div class="collapsible-header">
+                <h2>Week 1: Introduction to Mobile Development</h2>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="collapsible-content">
+                <div class="entry-meta">Posted on: September 2025</div>
+                <p>Initial setup and understanding of Progressive Web Apps. Learned about the course structure and project requirements. Explored the basics of HTML and CSS for creating responsive web layouts.</p>
+                
+                <h3>Key Learnings</h3>
+                <p>Understood the importance of Progressive Web Apps in modern web development and how they bridge the gap between web and mobile applications. Learned about the project requirements for the Learning Journal PWA.</p>
+                
+                <h3>Setup Process</h3>
+                <p>Set up the initial project structure with proper folder organization, created the basic HTML pages, and established the GitHub repository for version control.</p>
+            </div>
+        </article>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 Chandandeep Singh. All rights reserved.</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
