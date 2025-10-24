@@ -1,12 +1,10 @@
-// js/browser.js - Browser API functionality
-
-// ===== CLIPBOARD API =====
+// Enhanced Clipboard API with forced re-initialization
 function initClipboardAPI() {
-    // Add copy buttons to journal entries
+    // Remove existing copy buttons first
+    document.querySelectorAll('.copy-btn').forEach(btn => btn.remove());
+    
+    // Add copy buttons to ALL journal entries
     document.querySelectorAll('.journal-entry').forEach(entry => {
-        // Check if copy button already exists
-        if (entry.querySelector('.copy-btn')) return;
-        
         const copyBtn = document.createElement('button');
         copyBtn.className = 'copy-btn';
         copyBtn.innerHTML = '📋 Copy';
@@ -44,6 +42,8 @@ function initClipboardAPI() {
             entryActions.appendChild(copyBtn);
         }
     });
+    
+    console.log('Copy buttons initialized');
 }
 
 // ===== VALIDATION API =====

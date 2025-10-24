@@ -70,9 +70,10 @@ function initThemeSwitcher() {
 }
 
 // Journal Entry Creation
+// Enhanced Journal Entry Creation with Delete Button
 function createJournalEntry(title, content, date) {
     return `
-        <article class="journal-entry collapsible">
+        <article class="journal-entry collapsible" data-deletable="true">
             <div class="collapsible-header">
                 <h2>${title}</h2>
                 <div class="entry-actions">
@@ -84,12 +85,29 @@ function createJournalEntry(title, content, date) {
                 <div class="entry-content">
                     ${content.replace(/\n/g, '<br>')}
                 </div>
+                <div class="entry-footer">
+                    <button class="delete-btn" onclick="deleteJournalEntry(this)">🗑️ Delete Entry</button>
+                </div>
             </div>
         </article>
     `;
 }
+// Delete Journal Entry Function
+function deleteJournalEntry(button) {
+    if (confirm('Are you sure you want to delete this journal entry?')) {
+        const entry = button.closest('.journal-entry');
+        if (entry && entry.getAttribute('data-deletable') === 'true') {
+            entry.remove();
+            saveJournalEntries(); // Update storage after deletion
+            alert('Journal entry deleted successfully!');
+        } else {
+            alert('This journal entry cannot be deleted.');
+        }
+    }
+}
 
-// Form Validation - UPDATED TO ADD ENTRIES AT TOP
+
+// Form Validation - Enhanced
 function initFormValidation() {
     const journalForm = document.getElementById('journal-form');
     
@@ -127,42 +145,48 @@ function initFormValidation() {
             const newEntryHTML = createJournalEntry(title, content, dateString);
             const journalEntriesContainer = document.getElementById('journal-entries-container');
             
-            // ADD NEW ENTRY AT THE TOP (after the form section)
+            // ADD NEW ENTRY AT THE TOP
             if (journalEntriesContainer) {
                 journalEntriesContainer.insertAdjacentHTML('afterbegin', newEntryHTML);
             }
             
-            // Save to storage and re-initialize
+            // Save to storage and re-initialize ALL features
             saveJournalEntries();
-            initCollapsibleSections();
-            initClipboardAPI();
+            initCollapsibleSections(); // Re-initialize collapsible
+            initClipboardAPI(); // Re-initialize copy buttons
             
             alert('Journal entry added successfully!');
             journalForm.reset();
-            updateWordCount('');
+            if (typeof updateWordCount === 'function') {
+                updateWordCount('');
+            }
             
             return true;
         });
     }
 }
 
-// Collapsible Sections
+// Fixed Collapsible Sections
 function initCollapsibleSections() {
     const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
     
     collapsibleHeaders.forEach(header => {
+        // Remove any existing event listeners
         const newHeader = header.cloneNode(true);
         header.parentNode.replaceChild(newHeader, header);
     });
     
+    // Re-select after cloning
     const freshHeaders = document.querySelectorAll('.collapsible-header');
     
     freshHeaders.forEach(header => {
+        // Ensure entry-actions container exists
         let entryActions = header.querySelector('.entry-actions');
         if (!entryActions) {
             entryActions = document.createElement('div');
             entryActions.className = 'entry-actions';
             
+            // Move existing toggle icon into entry-actions
             const toggleIcon = header.querySelector('.toggle-icon');
             if (toggleIcon) {
                 header.removeChild(toggleIcon);
@@ -172,26 +196,38 @@ function initCollapsibleSections() {
             header.appendChild(entryActions);
         }
         
+        // Find the content for this specific header
         const content = header.nextElementSibling;
         
         if (content && content.classList.contains('collapsible-content')) {
+            // Start with all sections COLLAPSED (display: none)
+            content.style.display = 'none';
+            header.classList.remove('active');
+            
+            // Add click event to header
             header.addEventListener('click', function(e) {
-                if (e.target.closest('.copy-btn')) return;
+                // Don't trigger if click was on copy button or delete button
+                if (e.target.closest('.copy-btn') || e.target.closest('.delete-btn')) return;
                 
-                if (content.style.display === 'block' || content.style.display === '') {
-                    content.style.display = 'none';
-                    this.classList.remove('active');
-                    const toggleIcon = this.querySelector('.toggle-icon');
-                    if (toggleIcon) toggleIcon.style.transform = 'rotate(0deg)';
-                } else {
+                // Toggle the content visibility
+                if (content.style.display === 'none') {
                     content.style.display = 'block';
                     this.classList.add('active');
+                    // Update toggle icon
                     const toggleIcon = this.querySelector('.toggle-icon');
-                    if (toggleIcon) toggleIcon.style.transform = 'rotate(180deg)';
+                    if (toggleIcon) {
+                        toggleIcon.style.transform = 'rotate(180deg)';
+                    }
+                } else {
+                    content.style.display = 'none';
+                    this.classList.remove('active');
+                    // Update toggle icon
+                    const toggleIcon = this.querySelector('.toggle-icon');
+                    if (toggleIcon) {
+                        toggleIcon.style.transform = 'rotate(0deg)';
+                    }
                 }
             });
-            
-            content.style.display = 'none';
         }
     });
 }
@@ -220,21 +256,20 @@ document.addEventListener('DOMContentLoaded', function() {
     displayLiveDate();
     initThemeSwitcher();
     initFormValidation();
-    initCollapsibleSections();
     
-    // Initialize Browser APIs
+    // Restore journal entries from storage FIRST
+    restoreJournalEntries();
+    
+    // THEN initialize UI components
+    initCollapsibleSections();
     initClipboardAPI();
     initEnhancedValidation();
-    initGeolocation();
     
     // Initialize Third Party APIs
     initYouTubeAPI();
-    initWeatherAPI();
-    
-    // Restore journal entries from storage
-    restoreJournalEntries();
     
     console.log('All features initialized successfully!');
+
 
     // Demonstrate DOM selection methods
     console.log('DOM Selection Methods Used:');
