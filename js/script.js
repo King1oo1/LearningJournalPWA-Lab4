@@ -294,21 +294,150 @@ function toggleEditMode(entry) {
     }
 }
 
+// ===== ENHANCED DELETE FUNCTIONALITY =====
 function deleteJournalEntry(entryId) {
-    if (confirm('Are you sure you want to delete this journal entry? This action cannot be undone.')) {
-        const entry = document.querySelector(`[data-entry-id="${entryId}"]`);
-        if (entry) {
-            entry.style.opacity = '0.7';
-            entry.style.transition = 'opacity 0.3s ease';
-            
-            setTimeout(() => {
-                entry.remove();
-                saveJournalEntries();
-                alert('Journal entry deleted successfully!');
-            }, 300);
+    showDeleteConfirmation(entryId);
+}
+
+function showDeleteConfirmation(entryId) {
+    // Create confirmation dialog
+    const confirmationHTML = `
+        <div class="delete-confirmation">
+            <div class="confirmation-dialog">
+                <h3>🗑️ Delete Journal Entry</h3>
+                <p>Are you sure you want to delete this journal entry? This action cannot be undone and the entry will be permanently removed.</p>
+                <div class="confirmation-actions">
+                    <button class="cancel-delete-btn" onclick="closeDeleteConfirmation()">
+                        ↩️ Keep Entry
+                    </button>
+                    <button class="confirm-delete-btn" onclick="confirmDeleteEntry('${entryId}')">
+                        🗑️ Delete Permanently
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', confirmationHTML);
+    
+    // Add escape key listener
+    const escapeHandler = (e) => {
+        if (e.key === 'Escape') {
+            closeDeleteConfirmation();
         }
+    };
+    document.addEventListener('keydown', escapeHandler);
+    
+    // Store the handler for cleanup
+    document.currentDeleteEscapeHandler = escapeHandler;
+}
+
+function closeDeleteConfirmation() {
+    const confirmation = document.querySelector('.delete-confirmation');
+    if (confirmation) {
+        confirmation.remove();
+    }
+    
+    // Clean up escape key listener
+    if (document.currentDeleteEscapeHandler) {
+        document.removeEventListener('keydown', document.currentDeleteEscapeHandler);
+        document.currentDeleteEscapeHandler = null;
     }
 }
+
+function confirmDeleteEntry(entryId) {
+    const entry = document.querySelector(`[data-entry-id="${entryId}"]`);
+    const deleteBtn = entry ? entry.querySelector('.delete-btn') : null;
+    
+    if (deleteBtn) {
+        // Show processing state
+        deleteBtn.classList.add('processing');
+        deleteBtn.innerHTML = '⏳ Deleting...';
+        
+        setTimeout(() => {
+            if (entry) {
+                // Add fade out animation
+                entry.style.transition = 'all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                entry.style.opacity = '0';
+                entry.style.transform = 'translateX(-100px)';
+                entry.style.maxHeight = '0';
+                entry.style.overflow = 'hidden';
+                
+                setTimeout(() => {
+                    entry.remove();
+                    saveJournalEntries();
+                    
+                    // Show success message
+                    showDeleteSuccessMessage();
+                    
+                    // Close confirmation dialog
+                    closeDeleteConfirmation();
+                }, 500);
+            }
+        }, 1000);
+    }
+}
+
+function showDeleteSuccessMessage() {
+    // Create success notification
+    const successMsg = document.createElement('div');
+    successMsg.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(39, 174, 96, 0.4);
+        z-index: 1001;
+        animation: slideInRight 0.5s ease, slideOutRight 0.5s ease 2.5s;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        max-width: 300px;
+    `;
+    
+    successMsg.innerHTML = '✅ Entry deleted successfully!';
+    document.body.appendChild(successMsg);
+    
+    // Auto remove after animation
+    setTimeout(() => {
+        if (successMsg.parentNode) {
+            successMsg.parentNode.removeChild(successMsg);
+        }
+    }, 3000);
+}
+
+// Add these keyframes for the success message animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+    }
+`;
+document.head.appendChild(style);
+
+
 
 // ===== BROWSER API: VALIDATION API ENHANCEMENT =====
 function initEnhancedValidation() {
