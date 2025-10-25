@@ -613,13 +613,11 @@ body {
     display: block;
 }
 
-/* ===== IMPROVED YOUTUBE CONTROLS - FIXED FOR MOBILE ===== */
+/* ===== FIXED YOUTUBE CONTROLS - NO OVERLAPPING ===== */
 #youtube-controls {
     margin-top: 1.5rem;
     display: flex;
-    gap: 0.8rem;
     justify-content: center;
-    flex-wrap: wrap;
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
@@ -634,11 +632,11 @@ body {
     max-width: 500px;
 }
 
-#youtube-controls button {
+.yt-control-btn {
     background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
     color: white;
     border: none;
-    padding: 0.8rem 1.2rem;
+    padding: 0.8rem 0.5rem;
     border-radius: 25px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -654,13 +652,13 @@ body {
     flex: 1;
 }
 
-#youtube-controls button:hover {
+.yt-control-btn:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 15px rgba(255, 0, 0, 0.4);
     background: linear-gradient(135deg, #cc0000 0%, #ff0000 100%);
 }
 
-#youtube-controls button:active {
+.yt-control-btn:active {
     transform: translateY(-1px);
 }
 
@@ -694,7 +692,6 @@ body {
     box-shadow: 0 6px 15px rgba(149, 165, 166, 0.4) !important;
     background: linear-gradient(135deg, #7f8c8d 0%, #95a5a6 100%) !important;
 }
-
 
 /* ===== STORAGE DEMO SECTION ===== */
 .storage-demo {
@@ -1098,8 +1095,6 @@ body {
         margin-left: 0;
     }
     
-    
-    
     /* YouTube Section Mobile Responsive */
     .youtube-section {
         padding: 1.5rem;
@@ -1116,45 +1111,16 @@ body {
         padding: 3px;
     }
     
-    /* FIXED YOUTUBE CONTROLS FOR MOBILE */
-    #youtube-controls {
-        flex-direction: row;
-        flex-wrap: wrap;
+    /* FIXED YOUTUBE CONTROLS FOR MOBILE - NO OVERLAPPING */
+    .youtube-controls-grid {
+        grid-template-columns: repeat(3, 1fr);
         gap: 0.6rem;
-        padding: 0 0.5rem;
-        justify-content: space-between;
     }
     
-    #youtube-controls button {
-        min-width: calc(50% - 0.6rem);
-        max-width: calc(50% - 0.6rem);
-        padding: 0.7rem 0.5rem;
+    .yt-control-btn {
+        padding: 0.7rem 0.4rem;
         font-size: 0.85rem;
-        margin: 0;
-        flex: 0 0 calc(50% - 0.6rem);
-    }
-    
-    /* Make sure buttons don't get too small on very small screens */
-    @media screen and (max-width: 400px) {
-        #youtube-controls button {
-            min-width: 100%;
-            max-width: 100%;
-            flex: 0 0 100%;
-            margin-bottom: 0.5rem;
-        }
-        
-        #youtube-controls {
-            gap: 0.5rem;
-        }
-        
-        #youtube-player {
-            height: 250px;
-        }
-        
-        #youtube-controls button {
-            padding: 0.6rem 0.4rem;
-            font-size: 0.8rem;
-        }
+        min-height: 45px;
     }
 }
 
@@ -1199,6 +1165,72 @@ body {
     .hero h1 {
         font-size: 3.5rem;
     }
+}
+
+/* Small Mobile Screens */
+@media screen and (max-width: 480px) {
+    .youtube-controls-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .yt-control-btn {
+        padding: 0.6rem 0.3rem;
+        font-size: 0.8rem;
+        min-height: 40px;
+    }
+    
+    #youtube-player {
+        height: 250px;
+    }
+    
+    .youtube-section {
+        padding: 1rem;
+        margin: 1.5rem 0.5rem;
+    }
+}
+
+/* Extra small screens */
+@media screen and (max-width: 360px) {
+    .youtube-controls-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .yt-control-btn {
+        padding: 0.5rem 0.3rem;
+        font-size: 0.75rem;
+        min-height: 35px;
+    }
+    
+    #youtube-player {
+        height: 200px;
+    }
+}
+
+/* Fix for mobile touch issues */
+@media (hover: none) and (pointer: coarse) {
+    .yt-control-btn {
+        min-height: 44px; /* Minimum touch target size */
+        padding: 0.8rem 0.5rem;
+    }
+    
+    #youtube-player {
+        /* Ensure YouTube player is touch-friendly */
+        touch-action: manipulation;
+    }
+}
+
+/* Loading state for buttons */
+.yt-control-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.yt-control-btn:disabled:hover {
+    transform: none !important;
+    box-shadow: 0 3px 10px rgba(255, 0, 0, 0.3) !important;
 }
 
 /* Mobile responsive for delete button */
@@ -1254,5 +1286,20 @@ body {
     .journal-entry {
         box-shadow: none;
         border: 1px solid #ddd;
+    }
+}
+
+/* Mobile help text */
+.mobile-note {
+    color: #666;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    text-align: center;
+    display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .mobile-note {
+        display: block;
     }
 }
