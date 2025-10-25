@@ -1,4 +1,4 @@
-// js/script.js - Complete with Big YouTube API and Edit Functionality
+// js/script.js - Complete Fixed Version
 
 // ===== STORAGE API ENHANCEMENTS =====
 function saveJournalEntries() {
@@ -66,24 +66,24 @@ function initThemeSwitcher() {
 
 // ===== HEADER STRUCTURE MANAGEMENT =====
 function ensureHeaderStructure() {
-    document.querySelectorAll('.journal-entry').forEach(entry => {
+    document.querySelectorAll('.journal-entry').forEach((entry, index) => {
         const header = entry.querySelector('.collapsible-header');
         if (!header) return;
         
         // Check if header already has proper structure
-        if (header.querySelector('.header-spacer') && header.querySelector('.entry-actions')) {
-            return; // Structure already exists
+        const existingSpacer = header.querySelector('.header-spacer');
+        const existingActions = header.querySelector('.entry-actions');
+        
+        if (existingSpacer && existingActions) {
+            // Structure exists, just ensure copy button is there
+            ensureCopyButton(header, entry);
+            return;
         }
         
         // Get the title text from existing content
         let titleText = header.textContent
-            .replace('▼', '')
-            .replace('📋 Copy', '')
-            .replace('✏️ Edit', '')
-            .replace('🗑️ Delete', '')
-            .replace('📋', '')
-            .replace('✏️', '')
-            .replace('🗑️', '')
+            .replace(/[▼📋✏️🗑️]/g, '') // Remove all icons
+            .replace(/Copy|Edit|Delete/g, '') // Remove button text
             .trim();
         
         // Clear header and rebuild with proper structure
@@ -131,71 +131,145 @@ function ensureHeaderStructure() {
     });
 }
 
-// ===== BROWSER API: CLIPBOARD API =====
-function initClipboardAPI() {
-    // Add copy buttons to journal entries
-    document.querySelectorAll('.journal-entry').forEach(entry => {
-        // Check if copy button already exists
-        if (entry.querySelector('.copy-btn')) return;
-        
+// Ensure copy button exists in header
+function ensureCopyButton(header, entry) {
+    const entryActions = header.querySelector('.entry-actions');
+    if (!entryActions) return;
+    
+    // Check if copy button already exists
+    if (!entryActions.querySelector('.copy-btn')) {
         const copyBtn = document.createElement('button');
         copyBtn.className = 'copy-btn';
         copyBtn.innerHTML = '📋 Copy';
         copyBtn.setAttribute('type', 'button');
-        copyBtn.addEventListener('click', function(e) {
+        
+        // Insert before toggle icon if it exists
+        const toggleIcon = entryActions.querySelector('.toggle-icon');
+        if (toggleIcon) {
+            entryActions.insertBefore(copyBtn, toggleIcon);
+        } else {
+            entryActions.appendChild(copyBtn);
+        }
+    }
+}
+
+// ===== BROWSER API: CLIPBOARD API - FIXED VERSION =====
+function initClipboardAPI() {
+    console.log('Initializing Clipboard API...');
+    
+    // Use event delegation for better performance and dynamic elements
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('copy-btn') || e.target.closest('.copy-btn')) {
+            const copyBtn = e.target.classList.contains('copy-btn') ? e.target : e.target.closest('.copy-btn');
+            const entry = copyBtn.closest('.journal-entry');
+            
+            if (!entry) {
+                console.error('Could not find journal entry for copy button');
+                return;
+            }
+            
             e.stopPropagation(); // Prevent triggering collapsible toggle
             
-            const title = entry.querySelector('h2').textContent;
+            const title = entry.querySelector('h2')?.textContent || 'Untitled';
             const contentElement = entry.querySelector('.collapsible-content');
-            const content = contentElement ? contentElement.textContent : '';
-            const textToCopy = `${title}\n\n${content}`;
+            let content = '';
             
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                // Show success feedback with better design
-                const originalHTML = this.innerHTML;
-                this.innerHTML = '✅ Copied!';
-                this.style.background = 'linear-gradient(135deg, #27ae60 0%, #229954 100%)';
-                
-                setTimeout(() => {
-                    this.innerHTML = originalHTML;
-                    this.style.background = '';
-                }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
-                const originalHTML = this.innerHTML;
-                this.innerHTML = '❌ Failed';
-                this.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
-                
-                setTimeout(() => {
-                    this.innerHTML = originalHTML;
-                    this.style.background = '';
-                }, 2000);
-            });
-        });
-        
-        // Add copy button to entry actions
-        const entryActions = entry.querySelector('.entry-actions');
-        if (entryActions) {
-            entryActions.appendChild(copyBtn);
+            if (contentElement) {
+                // Get text content from the collapsible content excluding buttons
+                const contentClone = contentElement.cloneNode(true);
+                const buttons = contentClone.querySelectorAll('button, .entry-footer');
+                buttons.forEach(btn => btn.remove());
+                content = contentClone.textContent || '';
+            }
+            
+            const textToCopy = `${title}\n\n${content}`.trim();
+            
+            console.log('Copying text:', textToCopy);
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    // Show success feedback
+                    const originalHTML = copyBtn.innerHTML;
+                    const originalBackground = copyBtn.style.background;
+                    
+                    copyBtn.innerHTML = '✅ Copied!';
+                    copyBtn.style.background = 'linear-gradient(135deg, #27ae60 0%, #229954 100%)';
+                    copyBtn.disabled = true;
+                    
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalHTML;
+                        copyBtn.style.background = originalBackground;
+                        copyBtn.disabled = false;
+                    }, 2000);
+                    
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    fallbackCopyText(textToCopy, copyBtn);
+                });
+            } else {
+                // Fallback for browsers that don't support clipboard API
+                fallbackCopyText(textToCopy, copyBtn);
+            }
         }
     });
 }
 
+// Fallback method for copying text
+function fallbackCopyText(text, button) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            const originalHTML = button.innerHTML;
+            const originalBackground = button.style.background;
+            
+            button.innerHTML = '✅ Copied!';
+            button.style.background = 'linear-gradient(135deg, #27ae60 0%, #229954 100%)';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.style.background = originalBackground;
+                button.disabled = false;
+            }, 2000);
+        } else {
+            throw new Error('Copy command failed');
+        }
+    } catch (err) {
+        console.error('Fallback copy failed: ', err);
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '❌ Failed';
+        button.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+        
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.style.background = '';
+        }, 2000);
+    } finally {
+        document.body.removeChild(textArea);
+    }
+}
+
 // ===== EDIT JOURNAL ENTRIES FUNCTIONALITY =====
 function initEditFunctionality() {
-    // Add edit functionality to new entries only
-    document.querySelectorAll('.journal-entry[data-is-new="true"]').forEach(entry => {
-        const editBtn = entry.querySelector('.edit-btn');
-        if (editBtn) {
-            // Remove existing event listeners
-            const newEditBtn = editBtn.cloneNode(true);
-            editBtn.parentNode.replaceChild(newEditBtn, editBtn);
+    // Use event delegation for edit buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('edit-btn') || e.target.closest('.edit-btn')) {
+            const editBtn = e.target.classList.contains('edit-btn') ? e.target : e.target.closest('.edit-btn');
+            const entry = editBtn.closest('.journal-entry');
             
-            // Add click event to the new button
-            newEditBtn.addEventListener('click', function(e) {
+            if (entry && entry.getAttribute('data-is-new') === 'true') {
                 e.stopPropagation();
                 toggleEditMode(entry);
-            });
+            }
         }
     });
 }
@@ -239,7 +313,7 @@ function toggleEditMode(entry) {
         saveJournalEntries();
         
         // Show success message
-        alert('Journal entry updated successfully!');
+        showSuccessMessage('Journal entry updated successfully!');
     } else {
         // Enter edit mode
         const title = entry.querySelector('h2').textContent;
@@ -295,8 +369,20 @@ function toggleEditMode(entry) {
 }
 
 // ===== ENHANCED DELETE FUNCTIONALITY =====
-function deleteJournalEntry(entryId) {
-    showDeleteConfirmation(entryId);
+function initDeleteFunctionality() {
+    // Use event delegation for delete buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-btn') || e.target.closest('.delete-btn')) {
+            const deleteBtn = e.target.classList.contains('delete-btn') ? e.target : e.target.closest('.delete-btn');
+            const entry = deleteBtn.closest('.journal-entry');
+            
+            if (entry && entry.getAttribute('data-is-new') === 'true') {
+                e.stopPropagation();
+                const entryId = entry.getAttribute('data-entry-id');
+                showDeleteConfirmation(entryId);
+            }
+        }
+    });
 }
 
 function showDeleteConfirmation(entryId) {
@@ -368,7 +454,7 @@ function confirmDeleteEntry(entryId) {
                     saveJournalEntries();
                     
                     // Show success message
-                    showDeleteSuccessMessage();
+                    showSuccessMessage('Journal entry deleted successfully!');
                     
                     // Close confirmation dialog
                     closeDeleteConfirmation();
@@ -377,67 +463,6 @@ function confirmDeleteEntry(entryId) {
         }, 1000);
     }
 }
-
-function showDeleteSuccessMessage() {
-    // Create success notification
-    const successMsg = document.createElement('div');
-    successMsg.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(39, 174, 96, 0.4);
-        z-index: 1001;
-        animation: slideInRight 0.5s ease, slideOutRight 0.5s ease 2.5s;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        max-width: 300px;
-    `;
-    
-    successMsg.innerHTML = '✅ Entry deleted successfully!';
-    document.body.appendChild(successMsg);
-    
-    // Auto remove after animation
-    setTimeout(() => {
-        if (successMsg.parentNode) {
-            successMsg.parentNode.removeChild(successMsg);
-        }
-    }, 3000);
-}
-
-// Add these keyframes for the success message animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInRight {
-        from {
-            opacity: 0;
-            transform: translateX(100px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-    
-    @keyframes slideOutRight {
-        from {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateX(100px);
-        }
-    }
-`;
-document.head.appendChild(style);
-
-
 
 // ===== BROWSER API: VALIDATION API ENHANCEMENT =====
 function initEnhancedValidation() {
@@ -620,11 +645,10 @@ function initFormValidation() {
             // Re-initialize features for new entry
             ensureHeaderStructure();
             initCollapsibleSections();
-            initClipboardAPI();
             initEditFunctionality();
             saveJournalEntries();
             
-            alert('Journal entry added successfully!');
+            showSuccessMessage('Journal entry added successfully!');
             journalForm.reset();
             updateWordCount('');
             
@@ -644,8 +668,8 @@ function createJournalEntry(title, content, date, isNewEntry = false) {
                 <div class="header-spacer"></div>
                 <div class="entry-actions">
                     <span class="toggle-icon">▼</span>
-                    ${isNewEntry ? '<button class="edit-btn">✏️ Edit</button>' : ''}
-                    <button class="copy-btn">📋 Copy</button>
+                    ${isNewEntry ? '<button class="edit-btn" type="button">✏️ Edit</button>' : ''}
+                    <button class="copy-btn" type="button">📋 Copy</button>
                 </div>
             </div>
             <div class="collapsible-content">
@@ -654,8 +678,8 @@ function createJournalEntry(title, content, date, isNewEntry = false) {
                     ${content.replace(/\n/g, '<br>')}
                 </div>
                 ${isNewEntry ? `
-                <div class="entry-footer">
-                    <button class="delete-btn" onclick="deleteJournalEntry('${entryId}')">
+                <div style="margin-top: 1.5rem; text-align: center;">
+                    <button class="delete-btn" type="button">
                         🗑️ Delete Entry
                     </button>
                 </div>
@@ -686,9 +710,7 @@ function initCollapsibleSections() {
             // Add click event to header
             freshHeader.addEventListener('click', function(e) {
                 // Don't trigger if click was on copy button or edit button
-                if (e.target.closest('.copy-btn') || e.target.closest('.edit-btn')) return;
-                
-                console.log('Header clicked, current display:', content.style.display);
+                if (e.target.closest('.copy-btn') || e.target.closest('.edit-btn') || e.target.closest('.delete-btn')) return;
                 
                 // Toggle the content visibility
                 if (content.style.display === 'block' || content.style.display === '') {
@@ -698,9 +720,6 @@ function initCollapsibleSections() {
                     content.style.display = 'block';
                     this.classList.add('active');
                 }
-                
-                // Force a reflow to ensure animation works
-                content.offsetHeight;
             });
         }
     });
@@ -788,34 +807,114 @@ function loadSavedEntries() {
     }
 }
 
+// ===== SUCCESS MESSAGE FUNCTION =====
+function showSuccessMessage(message) {
+    // Create success notification
+    const successMsg = document.createElement('div');
+    successMsg.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(39, 174, 96, 0.4);
+        z-index: 1001;
+        animation: slideInRight 0.5s ease, slideOutRight 0.5s ease 2.5s;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        max-width: 300px;
+    `;
+    
+    successMsg.innerHTML = `✅ ${message}`;
+    document.body.appendChild(successMsg);
+    
+    // Auto remove after animation
+    setTimeout(() => {
+        if (successMsg.parentNode) {
+            successMsg.parentNode.removeChild(successMsg);
+        }
+    }, 3000);
+}
+
 // ===== ENHANCED INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded - initializing enhanced features');
     
-    // Load reusable navigation
+    // Load reusable navigation first
     loadNavigation();
     
-    // Initialize basic features first
+    // Initialize basic features
     displayLiveDate();
     initThemeSwitcher();
     initFormValidation();
     initEnhancedValidation();
     initYouTubeAPI();
     
-    // Load saved entries and initialize components
+    // Load saved entries and initialize components with proper timing
     setTimeout(() => {
+        console.log('Loading saved entries and initializing components...');
+        
+        // Load saved entries first
         loadSavedEntries();
+        
+        // Then ensure proper structure
         ensureHeaderStructure();
+        
+        // Initialize interactive components
         initCollapsibleSections();
         initClipboardAPI();
         initEditFunctionality();
+        initDeleteFunctionality();
         
         console.log('All enhanced features initialized successfully!');
         
+
         // Demonstrate DOM selection methods
         console.log('DOM Selection Methods Used:');
         console.log('- getElementById: for single elements like live-date, theme-toggle');
         console.log('- querySelectorAll: for multiple elements like collapsible sections');
         console.log('- querySelector: for single element selection');
+
+        // Debug: Log all copy buttons found
+        const copyButtons = document.querySelectorAll('.copy-btn');
+        console.log(`Found ${copyButtons.length} copy buttons in the document`);
+        
     }, 100);
 });
+
+// Add keyframes for animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+    }
+    
+    @keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+`;
+document.head.appendChild(style);  
+        
