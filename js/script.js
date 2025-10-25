@@ -1,68 +1,4 @@
-// js/script.js - Complete Fixed Version
-
-// ===== STORAGE API ENHANCEMENTS =====
-function saveJournalEntries() {
-    const entries = [];
-    document.querySelectorAll('.journal-entry').forEach(entry => {
-        const contentElement = entry.querySelector('.collapsible-content');
-        if (contentElement) {
-            const isNew = entry.getAttribute('data-is-new') === 'true';
-            entries.push({
-                title: entry.querySelector('h2').textContent,
-                content: contentElement.innerHTML,
-                date: entry.querySelector('.entry-meta').textContent,
-                isNew: isNew,
-                id: entry.getAttribute('data-entry-id')
-            });
-        }
-    });
-    localStorage.setItem('journalEntries', JSON.stringify(entries));
-}
-
-function loadJournalEntries() {
-    const savedEntries = localStorage.getItem('journalEntries');
-    if (savedEntries) {
-        const entries = JSON.parse(savedEntries);
-        // Only load new entries (not Week 1-4)
-        const newEntries = entries.filter(entry => entry.isNew);
-        return newEntries;
-    }
-    return null;
-}
-
-// Enhanced theme storage with session storage fallback
-function initThemeSwitcher() {
-    const themeToggle = document.getElementById('theme-toggle');
-    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    // Check multiple storage options
-    const currentTheme = localStorage.getItem('theme') || 
-                        sessionStorage.getItem('theme') ||
-                        (prefersDarkScheme.matches ? 'dark' : 'light');
-    
-    if (currentTheme === 'dark') {
-        document.body.classList.add('dark-theme');
-        if (themeToggle) themeToggle.textContent = '☀️ Light Mode';
-    }
-    
-    if (themeToggle) {
-        themeToggle.addEventListener('click', function() {
-            document.body.classList.toggle('dark-theme');
-            
-            let theme = 'light';
-            if (document.body.classList.contains('dark-theme')) {
-                theme = 'dark';
-                this.textContent = '☀️ Light Mode';
-            } else {
-                this.textContent = '🌙 Dark Mode';
-            }
-            
-            // Save to both local and session storage
-            localStorage.setItem('theme', theme);
-            sessionStorage.setItem('theme', theme);
-        });
-    }
-}
+// js/script.js - Main Application Logic
 
 // ===== HEADER STRUCTURE MANAGEMENT =====
 function ensureHeaderStructure() {
@@ -150,111 +86,6 @@ function ensureCopyButton(header, entry) {
         } else {
             entryActions.appendChild(copyBtn);
         }
-    }
-}
-
-// ===== BROWSER API: CLIPBOARD API - FIXED VERSION =====
-function initClipboardAPI() {
-    console.log('Initializing Clipboard API...');
-    
-    // Use event delegation for better performance and dynamic elements
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('copy-btn') || e.target.closest('.copy-btn')) {
-            const copyBtn = e.target.classList.contains('copy-btn') ? e.target : e.target.closest('.copy-btn');
-            const entry = copyBtn.closest('.journal-entry');
-            
-            if (!entry) {
-                console.error('Could not find journal entry for copy button');
-                return;
-            }
-            
-            e.stopPropagation(); // Prevent triggering collapsible toggle
-            
-            const title = entry.querySelector('h2')?.textContent || 'Untitled';
-            const contentElement = entry.querySelector('.collapsible-content');
-            let content = '';
-            
-            if (contentElement) {
-                // Get text content from the collapsible content excluding buttons
-                const contentClone = contentElement.cloneNode(true);
-                const buttons = contentClone.querySelectorAll('button, .entry-footer');
-                buttons.forEach(btn => btn.remove());
-                content = contentClone.textContent || '';
-            }
-            
-            const textToCopy = `${title}\n\n${content}`.trim();
-            
-            console.log('Copying text:', textToCopy);
-            
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    // Show success feedback
-                    const originalHTML = copyBtn.innerHTML;
-                    const originalBackground = copyBtn.style.background;
-                    
-                    copyBtn.innerHTML = '✅ Copied!';
-                    copyBtn.style.background = 'linear-gradient(135deg, #27ae60 0%, #229954 100%)';
-                    copyBtn.disabled = true;
-                    
-                    setTimeout(() => {
-                        copyBtn.innerHTML = originalHTML;
-                        copyBtn.style.background = originalBackground;
-                        copyBtn.disabled = false;
-                    }, 2000);
-                    
-                }).catch(err => {
-                    console.error('Failed to copy: ', err);
-                    fallbackCopyText(textToCopy, copyBtn);
-                });
-            } else {
-                // Fallback for browsers that don't support clipboard API
-                fallbackCopyText(textToCopy, copyBtn);
-            }
-        }
-    });
-}
-
-// Fallback method for copying text
-function fallbackCopyText(text, button) {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-999999px';
-    textArea.style.top = '-999999px';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    
-    try {
-        const successful = document.execCommand('copy');
-        if (successful) {
-            const originalHTML = button.innerHTML;
-            const originalBackground = button.style.background;
-            
-            button.innerHTML = '✅ Copied!';
-            button.style.background = 'linear-gradient(135deg, #27ae60 0%, #229954 100%)';
-            button.disabled = true;
-            
-            setTimeout(() => {
-                button.innerHTML = originalHTML;
-                button.style.background = originalBackground;
-                button.disabled = false;
-            }, 2000);
-        } else {
-            throw new Error('Copy command failed');
-        }
-    } catch (err) {
-        console.error('Fallback copy failed: ', err);
-        const originalHTML = button.innerHTML;
-        button.innerHTML = '❌ Failed';
-        button.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
-        
-        setTimeout(() => {
-            button.innerHTML = originalHTML;
-            button.style.background = '';
-        }, 2000);
-    } finally {
-        document.body.removeChild(textArea);
     }
 }
 
@@ -464,138 +295,7 @@ function confirmDeleteEntry(entryId) {
     }
 }
 
-// ===== BROWSER API: VALIDATION API ENHANCEMENT =====
-function initEnhancedValidation() {
-    const journalForm = document.getElementById('journal-form');
-    const entryInput = document.getElementById('journal-entry');
-    
-    if (entryInput) {
-        entryInput.addEventListener('input', function() {
-            // Use Constraint Validation API
-            if (this.validity.tooShort) {
-                this.setCustomValidity(`Please enter at least ${this.minLength} characters. You have ${this.value.length}.`);
-            } else if (this.validity.valueMissing) {
-                this.setCustomValidity('Please write your journal entry.');
-            } else {
-                this.setCustomValidity('');
-            }
-            
-            // Update word count display
-            updateWordCount(this.value);
-        });
-    }
-}
-
-function updateWordCount(text) {
-    let wordCountEl = document.getElementById('word-count');
-    if (!wordCountEl) {
-        wordCountEl = document.createElement('div');
-        wordCountEl.id = 'word-count';
-        wordCountEl.className = 'word-count';
-        const entryInput = document.getElementById('journal-entry');
-        if (entryInput) {
-            entryInput.parentNode.appendChild(wordCountEl);
-        }
-    }
-    
-    const words = text.trim() ? text.trim().split(/\s+/).filter(word => word.length > 0).length : 0;
-    wordCountEl.textContent = `Word count: ${words}`;
-    wordCountEl.className = `word-count ${words >= 10 ? 'valid' : 'invalid'}`;
-}
-
-// ===== THIRD-PARTY API: YOUTUBE EMBED =====
-function initYouTubeAPI() {
-    const playerContainer = document.getElementById('youtube-player');
-    if (!playerContainer) {
-        console.log('YouTube player container not found');
-        return;
-    }
-    
-    console.log('Initializing YouTube API...');
-    
-    // Check if YouTube API is already loaded
-    if (window.YT && window.YT.Player) {
-        createYouTubePlayer();
-    } else {
-        // Load YouTube IFrame API
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    }
-}
-
-// YouTube player global variable
-let youtubePlayer;
-
-// This function is called by YouTube API when ready
-window.onYouTubeIframeAPIReady = function() {
-    console.log('YouTube API ready');
-    createYouTubePlayer();
-};
-
-function createYouTubePlayer() {
-    const playerContainer = document.getElementById('youtube-player');
-    if (!playerContainer) return;
-    
-    try {
-        youtubePlayer = new YT.Player('youtube-player', {
-            height: '405',
-            width: '720',
-            videoId: 'WXsD0ZgxjRw',
-            playerVars: {
-                'playsinline': 1,
-                'rel': 0,
-                'modestbranding': 1,
-                'enablejsapi': 1
-            },
-            events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange
-            }
-        });
-        console.log('YouTube player created successfully with video: WXsD0ZgxjRw');
-    } catch (error) {
-        console.error('Error creating YouTube player:', error);
-    }
-}
-
-function onPlayerReady(event) {
-    console.log('YouTube player ready');
-    // Add custom controls
-    addYouTubeControls();
-}
-
-function onPlayerStateChange(event) {
-    // You can add custom behavior on state changes
-    const states = ['unstarted', 'ended', 'playing', 'paused', 'buffering', 'video cued'];
-    console.log('Player state:', states[event.data]);
-}
-
-function addYouTubeControls() {
-    const controlsDiv = document.getElementById('youtube-controls');
-    if (!controlsDiv) return;
-    
-    controlsDiv.innerHTML = `
-        <button onclick="youtubePlayer.playVideo()">
-            <span style="font-size:1.2em">▶️</span> Play
-        </button>
-        <button onclick="youtubePlayer.pauseVideo()">
-            <span style="font-size:1.2em">⏸️</span> Pause
-        </button>
-        <button onclick="youtubePlayer.stopVideo()">
-            <span style="font-size:1.2em">⏹️</span> Stop
-        </button>
-        <button onclick="youtubePlayer.mute()">
-            <span style="font-size:1.2em">🔇</span> Mute
-        </button>
-        <button onclick="youtubePlayer.unMute()">
-            <span style="font-size:1.2em">🔊</span> Unmute
-        </button>
-    `;
-}
-
-// ===== ENHANCED FORM VALIDATION WITH VALIDATION API =====
+// ===== ENHANCED FORM VALIDATION =====
 function initFormValidation() {
     const journalForm = document.getElementById('journal-form');
     
@@ -769,44 +469,6 @@ function displayLiveDate() {
     }
 }
 
-// ===== STORAGE DEMO FUNCTION =====
-function showStorageInfo() {
-    const infoDiv = document.getElementById('storage-info');
-    const theme = localStorage.getItem('theme') || 'light';
-    const entries = localStorage.getItem('journalEntries');
-    const entryCount = entries ? JSON.parse(entries).length : 0;
-    
-    infoDiv.innerHTML = `
-        <p><strong>Current Theme:</strong> ${theme}</p>
-        <p><strong>Saved Journal Entries:</strong> ${entryCount}</p>
-        <p><strong>Storage Used:</strong> ${calculateStorageUsage()} KB</p>
-    `;
-}
-
-function calculateStorageUsage() {
-    let total = 0;
-    for (let key in localStorage) {
-        if (localStorage.hasOwnProperty(key)) {
-            total += localStorage[key].length;
-        }
-    }
-    return (total / 1024).toFixed(2);
-}
-
-// ===== LOAD SAVED ENTRIES =====
-function loadSavedEntries() {
-    const savedEntries = loadJournalEntries();
-    if (savedEntries && savedEntries.length > 0) {
-        const journalFormSection = document.querySelector('.journal-form-section');
-        if (journalFormSection) {
-            savedEntries.forEach(entry => {
-                const entryHTML = createJournalEntry(entry.title, entry.content, entry.date, true);
-                journalFormSection.insertAdjacentHTML('afterend', entryHTML);
-            });
-        }
-    }
-}
-
 // ===== SUCCESS MESSAGE FUNCTION =====
 function showSuccessMessage(message) {
     // Create success notification
@@ -872,13 +534,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log('All enhanced features initialized successfully!');
         
-
-        // Demonstrate DOM selection methods
-        console.log('DOM Selection Methods Used:');
-        console.log('- getElementById: for single elements like live-date, theme-toggle');
-        console.log('- querySelectorAll: for multiple elements like collapsible sections');
-        console.log('- querySelector: for single element selection');
-
         // Debug: Log all copy buttons found
         const copyButtons = document.querySelectorAll('.copy-btn');
         console.log(`Found ${copyButtons.length} copy buttons in the document`);
@@ -915,6 +570,54 @@ style.textContent = `
         0% { left: -100%; }
         100% { left: 100%; }
     }
+    
+    .youtube-controls-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.8rem;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    
+    .yt-control-btn {
+        background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+        color: white;
+        border: none;
+        padding: 0.8rem 0.5rem;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        font-size: 0.9rem;
+        box-shadow: 0 3px 10px rgba(255, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
+        min-width: 100px;
+    }
+    
+    .yt-control-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(255, 0, 0, 0.4);
+    }
+    
+    .pause-btn {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%) !important;
+        box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3) !important;
+    }
+    
+    .stop-btn {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+        box-shadow: 0 3px 10px rgba(231, 76, 60, 0.3) !important;
+    }
+    
+    .mute-btn, .unmute-btn {
+        background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%) !important;
+        box-shadow: 0 3px 10px rgba(149, 165, 166, 0.3) !important;
+    }
 `;
-document.head.appendChild(style);  
-        
+document.head.appendChild(style);
+
+
+
