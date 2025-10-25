@@ -46,25 +46,25 @@
         <div class="collapsible-content">
             <div class="entry-meta">October 2025</div>   
             <h3>Which Storage, Browser, and Third-Party APIs did you choose, and why?</h3>
-            <p><strong>Storage API:</strong> Enhanced Local Storage for journal entries and theme preferences, with Session Storage as fallback. Chosen for its simplicity and wide browser support.</p>
-            <p><strong>Browser API:</strong> Clipboard API for copying journal entries and enhanced Validation API for form validation. These improve user experience significantly.</p>
-            <p><strong>Third-Party API:</strong> YouTube Player API to embed educational videos. Chosen because video content enhances learning experience.</p>
+            <p><strong>Storage API:</strong> Enhanced local storage for journal entries and theme choices, including Session Storage as a backup option. It was chosen for its simplicity and widespread browser support.</p>
+            <p><strong>Browser API:</strong> Clipboard API for copying journal entries and improved Validation API for form validation. These considerably improve the overall user experience.</p>
+            <p><strong>Third-Party API:</strong> The YouTube Player API allows you to connect with educational videos. We choose video content since it improves the learning experience.</p>
             
             <h3>How did you integrate each API with DOM manipulation?</h3>
-            <p><strong>Storage API:</strong> Used localStorage.setItem() and getItem() to persist data, then dynamically updated DOM elements based on stored preferences.</p>
+            <p><strong>Storage API:</strong> localStorage.setItem() saves data and then dynamically builds DOM elements on load.</p>
             <p><strong>Clipboard API:</strong> Added copy buttons to journal entries that use navigator.clipboard.writeText() and provide visual feedback.</p>
-            <p><strong>YouTube API:</strong> Used YT.Player() constructor to create embedded player and added custom controls that manipulate the video player.</p>
+            <p><strong>YouTube API:</strong> YT.Player() generates embedded video, custom buttons manage player using API functions.</p>
             
             <h3>What challenges did you encounter, and how did you solve them?</h3>
-            <p><strong>Clipboard API permissions:</strong> Some browsers require secure context (HTTPS). Added error handling and fallback messages.</p>
-            <p><strong>YouTube API loading:</strong> Had to ensure API script loads before initialization. Used the onYouTubeIframeAPIReady callback.</p>
-            <p><strong>Validation timing:</strong> Form validation needed to work with both custom logic and browser Validation API. Combined both approaches.</p>
+            <p><strong>Clipboard API permissions:</strong> Some browsers require a secure context (HTTPS). Error handling and backup messages were included.</p>
+            <p><strong>YouTube API loading:</strong> The API script needed to load before being initialised. I used the onYouTubeIframeAPIReady callback.</p>
+            <p><strong>Overlapping buttons:</strong> Stop button moved off-screen; corrected with CSS Grid and responsive layouts.</p>
             
             <h3>In what ways do these APIs improve your Learning Journal PWA?</h3>
-            <p><strong>Persistence:</strong> Users don't lose their entries or preferences when closing the browser.</p>
-            <p><strong>Usability:</strong> Copy functionality makes it easy to share insights, and form validation provides immediate feedback.</p>
-            <p><strong>Rich Content:</strong> YouTube integration adds multimedia learning resources directly in the journal.</p>
-            <p><strong>Professional Feel:</strong> APIs make the PWA feel like a native application with advanced features.</p>
+            <p><strong>Persistence:</strong> When the browser is closed, users' entries and preferences are saved.</p>
+            <p><strong>Usability:</strong> One-click copying and quick form response.</p>
+            <p><strong>Rich Content:</strong> Video integration improves learning.</p>
+            <p><strong>Professional appearance:</strong> Native app experience with smooth interactions.</p>
         </div>
     </article>
 
