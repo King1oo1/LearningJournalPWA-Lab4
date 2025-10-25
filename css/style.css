@@ -1129,39 +1129,6 @@ body {
     box-shadow: 0 8px 25px rgba(192, 57, 43, 0.6);
 }
 
-/* Entry footer styling */
-.entry-footer {
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 2px solid #e9ecef;
-    display: flex;
-    justify-content: center;
-    position: relative;
-}
-
-.entry-footer::before {
-    content: '⚠️ Manage Entry';
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--card-bg);
-    padding: 0 1rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #7f8c8d;
-    white-space: nowrap;
-}
-
-.dark-theme .entry-footer {
-    border-top-color: #404040;
-}
-
-.dark-theme .entry-footer::before {
-    background: var(--card-bg);
-    color: #bdc3c7;
-}
-
 /* Confirmation dialog styles */
 .delete-confirmation {
     position: fixed;
@@ -1268,10 +1235,5 @@ body {
     
     .confirmation-actions {
         flex-direction: column;
-    }
-    
-    .entry-footer::before {
-        font-size: 0.75rem;
-        padding: 0 0.5rem;
     }
 }
